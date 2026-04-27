@@ -883,6 +883,12 @@ services:
       opensearch:
         condition: service_healthy
     logging: *logging
+    env_file:
+      # Local TigerLite endpoint + ingest token. Optional: collector falls
+      # back to defaults (host.docker.internal:8080, placeholder token) when
+      # the file is absent. Gitignored — never pushed.
+      - path: .env.tigerlite
+        required: false
     environment:
       - FRONTEND_PROXY_ADDR
       - HOST_FILESYSTEM
@@ -896,8 +902,6 @@ services:
       - POSTGRES_PORT
       - POSTGRES_PASSWORD
       - POSTGRES_MONITORING_PASSWORD
-      - TIGERLITE_OTLP_ENDPOINT=${TIGERLITE_OTLP_ENDPOINT:-http://host.docker.internal:8080}
-      - TIGERLITE_INGEST_TOKEN=${TIGERLITE_INGEST_TOKEN:-tigerlite-placeholder-token}
       - GOMEMLIMIT=160MiB
 
   # Prometheus

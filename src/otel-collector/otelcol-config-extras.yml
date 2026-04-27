@@ -11,9 +11,9 @@
 # unaffected.
 exporters:
   otlphttp/tigerlite:
-    endpoint: ${env:TIGERLITE_OTLP_ENDPOINT}
+    endpoint: ${env:TIGERLITE_OTLP_ENDPOINT:-http://host.docker.internal:8080}
     headers:
-      Authorization: "Bearer ${env:TIGERLITE_INGEST_TOKEN}"
+      Authorization: "Bearer ${env:TIGERLITE_INGEST_TOKEN:-tigerlite-placeholder-token}"
     sending_queue:
       batch:
 
