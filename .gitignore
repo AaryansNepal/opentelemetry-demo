@@ -62,3 +62,9 @@ test/tracetesting/tracetesting-vars.yaml
 
 !src/currency/build
 
+# TigerLite platform docs — kept local only, not pushed to this fork
+tigerlite-docs/
+
+# Local TigerLite ingest token / endpoint overrides
+.env.tigerlite
+

@@ -13,74 +13,74 @@ networks:
     driver: bridge
 
 services:
-  # ******************
-  # Core Demo Services
-  # ******************
-  # Accounting service
-  accounting:
-    image: ${IMAGE_NAME}:${DEMO_VERSION}-accounting
-    container_name: accounting
-    build:
-      context: ./
-      dockerfile: ${ACCOUNTING_DOCKERFILE}
-      cache_from:
-        - ${IMAGE_NAME}:${IMAGE_VERSION}-accounting
-    deploy:
-      resources:
-        limits:
-          memory: 160M
-    restart: unless-stopped
-    environment:
-      - KAFKA_ADDR
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=low
-      - OTEL_SERVICE_NAME=accounting
-      - DB_CONNECTION_STRING=Host=${POSTGRES_HOST};Username=astronomy_user;Password=${POSTGRES_ASTRONOMY_PASSWORD};Database=astronomy_db
-      - OTEL_DOTNET_AUTO_TRACES_ENTITYFRAMEWORKCORE_INSTRUMENTATION_ENABLED=false
-    depends_on:
-      otel-collector:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-    logging: *logging
-
-  # AdService
-  ad:
-    image: ${IMAGE_NAME}:${DEMO_VERSION}-ad
-    container_name: ad
-    build:
-      context: ./
-      dockerfile: ${AD_DOCKERFILE}
-      cache_from:
-        - ${IMAGE_NAME}:${IMAGE_VERSION}-ad
-      args:
-        OTEL_JAVA_AGENT_VERSION: ${OTEL_JAVA_AGENT_VERSION}
-    deploy:
-      resources:
-        limits:
-          memory: 300M
-    restart: unless-stopped
-    ports:
-      - "${AD_PORT}"
-    environment:
-      - AD_PORT
-      - FLAGD_HOST
-      - FLAGD_PORT
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=medium
-      - OTEL_LOGS_EXPORTER=otlp
-      - OTEL_SERVICE_NAME=ad
-
-    depends_on:
-      otel-collector:
-        condition: service_started
-      flagd:
-        condition: service_started
-    logging: *logging
-
-  # Cart service
+#   # ******************
+#   # Core Demo Services
+#   # ******************
+#   # Accounting service
+#   accounting:
+#     image: ${IMAGE_NAME}:${DEMO_VERSION}-accounting
+#     container_name: accounting
+#     build:
+#       context: ./
+#       dockerfile: ${ACCOUNTING_DOCKERFILE}
+#       cache_from:
+#         - ${IMAGE_NAME}:${IMAGE_VERSION}-accounting
+#     deploy:
+#       resources:
+#         limits:
+#           memory: 160M
+#     restart: unless-stopped
+#     environment:
+#       - KAFKA_ADDR
+#       - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
+#       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+#       - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=low
+#       - OTEL_SERVICE_NAME=accounting
+#       - DB_CONNECTION_STRING=Host=${POSTGRES_HOST};Username=astronomy_user;Password=${POSTGRES_ASTRONOMY_PASSWORD};Database=astronomy_db
+#       - OTEL_DOTNET_AUTO_TRACES_ENTITYFRAMEWORKCORE_INSTRUMENTATION_ENABLED=false
+#     depends_on:
+#       otel-collector:
+#         condition: service_started
+#       kafka:
+#         condition: service_healthy
+#     logging: *logging
+#
+#   # AdService
+#   ad:
+#     image: ${IMAGE_NAME}:${DEMO_VERSION}-ad
+#     container_name: ad
+#     build:
+#       context: ./
+#       dockerfile: ${AD_DOCKERFILE}
+#       cache_from:
+#         - ${IMAGE_NAME}:${IMAGE_VERSION}-ad
+#       args:
+#         OTEL_JAVA_AGENT_VERSION: ${OTEL_JAVA_AGENT_VERSION}
+#     deploy:
+#       resources:
+#         limits:
+#           memory: 300M
+#     restart: unless-stopped
+#     ports:
+#       - "${AD_PORT}"
+#     environment:
+#       - AD_PORT
+#       - FLAGD_HOST
+#       - FLAGD_PORT
+#       - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
+#       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+#       - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=medium
+#       - OTEL_LOGS_EXPORTER=otlp
+#       - OTEL_SERVICE_NAME=ad
+#
+#     depends_on:
+#       otel-collector:
+#         condition: service_started
+#       flagd:
+#         condition: service_started
+#     logging: *logging
+#
+#   # Cart service
   cart:
     image: ${IMAGE_NAME}:${DEMO_VERSION}-cart
     container_name: cart
@@ -150,10 +150,10 @@ services:
     depends_on:
       cart:
         condition: service_started
-      currency:
-        condition: service_started
-      email:
-        condition: service_started
+#       currency:
+#         condition: service_started
+#       email:
+#         condition: service_started
       payment:
         condition: service_started
       product-catalog:
@@ -168,101 +168,101 @@ services:
         condition: service_started
     logging: *logging
 
-  # Currency service
-  currency:
-    image: ${IMAGE_NAME}:${DEMO_VERSION}-currency
-    container_name: currency
-    build:
-      context: ./
-      dockerfile: ${CURRENCY_DOCKERFILE}
-      cache_from:
-        - ${IMAGE_NAME}:${IMAGE_VERSION}-currency
-      args:
-        OPENTELEMETRY_CPP_VERSION: ${OPENTELEMETRY_CPP_VERSION}
-    deploy:
-      resources:
-        limits:
-          memory: 20M
-    restart: unless-stopped
-    ports:
-      - "${CURRENCY_PORT}"
-    environment:
-      - CURRENCY_PORT
-      - IPV6_ENABLED
-      - VERSION=${IMAGE_VERSION}
-      - OTEL_EXPORTER_OTLP_ENDPOINT
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=high
-      - OTEL_SERVICE_NAME=currency
-    depends_on:
-      otel-collector:
-        condition: service_started
-    logging: *logging
-
-  # Email service
-  email:
-    image: ${IMAGE_NAME}:${DEMO_VERSION}-email
-    container_name: email
-    build:
-      context: ./
-      dockerfile: ${EMAIL_DOCKERFILE}
-      cache_from:
-        - ${IMAGE_NAME}:${IMAGE_VERSION}-email
-    deploy:
-      resources:
-        limits:
-          memory: 100M
-    restart: unless-stopped
-    ports:
-      - "${EMAIL_PORT}"
-    environment:
-      - APP_ENV=production
-      - EMAIL_PORT
-      - FLAGD_HOST
-      - FLAGD_PORT
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=medium
-      - OTEL_SERVICE_NAME=email
-    depends_on:
-      otel-collector:
-        condition: service_started
-    logging: *logging
-
-  # Fraud Detection service
-  fraud-detection:
-    image: ${IMAGE_NAME}:${DEMO_VERSION}-fraud-detection
-    container_name: fraud-detection
-    build:
-      context: ./
-      dockerfile: ${FRAUD_DOCKERFILE}
-      cache_from:
-        - ${IMAGE_NAME}:${IMAGE_VERSION}-fraud-detection
-      args:
-        OTEL_JAVA_AGENT_VERSION: ${OTEL_JAVA_AGENT_VERSION}
-    deploy:
-      resources:
-        limits:
-          memory: 300M
-    restart: unless-stopped
-    environment:
-      - FLAGD_HOST
-      - FLAGD_PORT
-      - KAFKA_ADDR
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
-      - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
-      - OTEL_INSTRUMENTATION_KAFKA_EXPERIMENTAL_SPAN_ATTRIBUTES=true
-      - OTEL_INSTRUMENTATION_MESSAGING_EXPERIMENTAL_RECEIVE_TELEMETRY_ENABLED=true
-      - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=low
-      - OTEL_SERVICE_NAME=fraud-detection
-    depends_on:
-      otel-collector:
-        condition: service_started
-      kafka:
-        condition: service_healthy
-    logging: *logging
-
-  # Frontend
+#   # Currency service
+#   currency:
+#     image: ${IMAGE_NAME}:${DEMO_VERSION}-currency
+#     container_name: currency
+#     build:
+#       context: ./
+#       dockerfile: ${CURRENCY_DOCKERFILE}
+#       cache_from:
+#         - ${IMAGE_NAME}:${IMAGE_VERSION}-currency
+#       args:
+#         OPENTELEMETRY_CPP_VERSION: ${OPENTELEMETRY_CPP_VERSION}
+#     deploy:
+#       resources:
+#         limits:
+#           memory: 20M
+#     restart: unless-stopped
+#     ports:
+#       - "${CURRENCY_PORT}"
+#     environment:
+#       - CURRENCY_PORT
+#       - IPV6_ENABLED
+#       - VERSION=${IMAGE_VERSION}
+#       - OTEL_EXPORTER_OTLP_ENDPOINT
+#       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+#       - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=high
+#       - OTEL_SERVICE_NAME=currency
+#     depends_on:
+#       otel-collector:
+#         condition: service_started
+#     logging: *logging
+#
+#   # Email service
+#   email:
+#     image: ${IMAGE_NAME}:${DEMO_VERSION}-email
+#     container_name: email
+#     build:
+#       context: ./
+#       dockerfile: ${EMAIL_DOCKERFILE}
+#       cache_from:
+#         - ${IMAGE_NAME}:${IMAGE_VERSION}-email
+#     deploy:
+#       resources:
+#         limits:
+#           memory: 100M
+#     restart: unless-stopped
+#     ports:
+#       - "${EMAIL_PORT}"
+#     environment:
+#       - APP_ENV=production
+#       - EMAIL_PORT
+#       - FLAGD_HOST
+#       - FLAGD_PORT
+#       - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
+#       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+#       - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=medium
+#       - OTEL_SERVICE_NAME=email
+#     depends_on:
+#       otel-collector:
+#         condition: service_started
+#     logging: *logging
+#
+#   # Fraud Detection service
+#   fraud-detection:
+#     image: ${IMAGE_NAME}:${DEMO_VERSION}-fraud-detection
+#     container_name: fraud-detection
+#     build:
+#       context: ./
+#       dockerfile: ${FRAUD_DOCKERFILE}
+#       cache_from:
+#         - ${IMAGE_NAME}:${IMAGE_VERSION}-fraud-detection
+#       args:
+#         OTEL_JAVA_AGENT_VERSION: ${OTEL_JAVA_AGENT_VERSION}
+#     deploy:
+#       resources:
+#         limits:
+#           memory: 300M
+#     restart: unless-stopped
+#     environment:
+#       - FLAGD_HOST
+#       - FLAGD_PORT
+#       - KAFKA_ADDR
+#       - OTEL_EXPORTER_OTLP_ENDPOINT=http://${OTEL_COLLECTOR_HOST}:${OTEL_COLLECTOR_PORT_HTTP}
+#       - OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE
+#       - OTEL_INSTRUMENTATION_KAFKA_EXPERIMENTAL_SPAN_ATTRIBUTES=true
+#       - OTEL_INSTRUMENTATION_MESSAGING_EXPERIMENTAL_RECEIVE_TELEMETRY_ENABLED=true
+#       - OTEL_RESOURCE_ATTRIBUTES=${OTEL_RESOURCE_ATTRIBUTES},service.criticality=low
+#       - OTEL_SERVICE_NAME=fraud-detection
+#     depends_on:
+#       otel-collector:
+#         condition: service_started
+#       kafka:
+#         condition: service_healthy
+#     logging: *logging
+#
+#   # Frontend
   frontend:
     image: ${IMAGE_NAME}:${DEMO_VERSION}-frontend
     container_name: frontend
@@ -300,14 +300,14 @@ services:
       - FLAGD_HOST
       - FLAGD_PORT
     depends_on:
-      ad:
-        condition: service_started
+#       ad:
+#         condition: service_started
       cart:
         condition: service_started
       checkout:
         condition: service_started
-      currency:
-        condition: service_started
+#       currency:
+#         condition: service_started
       product-catalog:
         condition: service_started
       quote:
@@ -896,6 +896,8 @@ services:
       - POSTGRES_PORT
       - POSTGRES_PASSWORD
       - POSTGRES_MONITORING_PASSWORD
+      - TIGERLITE_OTLP_ENDPOINT=${TIGERLITE_OTLP_ENDPOINT:-http://host.docker.internal:8080}
+      - TIGERLITE_INGEST_TOKEN=${TIGERLITE_INGEST_TOKEN:-tigerlite-placeholder-token}
       - GOMEMLIMIT=160MiB
 
   # Prometheus
