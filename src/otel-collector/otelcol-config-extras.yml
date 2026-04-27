@@ -17,11 +17,15 @@ exporters:
     sending_queue:
       batch:
 
+# TigerLite currently only ingests traces (its dashboard's connect modal
+# advertises only http://localhost:8080/v1/traces). The /v1/metrics and
+# /v1/logs endpoints respond 400 InvalidArgument to real OTLP payloads —
+# treat them as unimplemented and only wire tigerlite into the traces
+# pipeline. Metrics and logs continue flowing to the bundled Prometheus
+# and OpenSearch exporters for local cross-checking. Re-add
+# `otlphttp/tigerlite` to the metrics/logs pipelines below once TigerLite
+# implements those signals.
 service:
   pipelines:
     traces:
       exporters: [otlp_grpc/jaeger, debug, spanmetrics, otlphttp/tigerlite]
-    metrics:
-      exporters: [otlp_http/prometheus, debug, otlphttp/tigerlite]
-    logs:
-      exporters: [opensearch, debug, otlphttp/tigerlite]
